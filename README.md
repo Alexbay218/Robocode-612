@@ -14,8 +14,4 @@ Use old wiki if http://www.robowiki.net/ is down
 
 Old wiki here: http://old.robowiki.net/
 
-Tournament rules:
-
-1v1
-
-code size under 2000 bytes
+Tournament rules on repository wiki
