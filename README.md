@@ -1,6 +1,6 @@
 Robocode-612 (Look in the repo wiki)
 
-Chat on Gitter: https://gitter.im/Alexbay218/Robocode-612?utm_source=share-link&utm_medium=link&utm_campaign=share-link
+Chat on Gitter: https://gitter.im/Alexbay218/Robocode-612
 
 "robots" folder contains all source code
 
