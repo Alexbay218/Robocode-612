@@ -17,3 +17,6 @@ Use old wiki if http://www.robowiki.net/ is down
 Old wiki here: http://old.robowiki.net/
 
 Tournament rules on repository wiki
+
+
+[![Join the chat at https://gitter.im/Alexbay218/Robocode-612](https://badges.gitter.im/Alexbay218/Robocode-612.svg)](https://gitter.im/Alexbay218/Robocode-612?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
