@@ -50,7 +50,8 @@ public class Shreker extends AdvancedRobot //AdvancedRobot has set methods (diff
 		angle = 90 - direction * e.getDistance()/180; //Calculate what angle for body to be at
 		turnRight(e.getBearing()+angle); //Almost always at perpendicular
 		setAhead(30*direction); //AdvancedRobot only
-		if(enemyLife > e.getEnergy()) { //Bullet prediction
+		if(enemyLife > e.getEnergy()) 
+		{ //Bullet prediction
 			enemyLife = e.getEnergy();
 			setColors(Color.green,Color.yellow,Color.green); //Feed back to human eyes
 			direction *= -1;
