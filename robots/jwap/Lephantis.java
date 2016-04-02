@@ -7,12 +7,13 @@ import java.awt.*;
  */
 public class Lephantis extends AdvancedRobot
 {
-	private double firstScan;
-	private double lastScanBearing;
-	private int targetFocus;
-	private boolean radarTurn;
-	private boolean justFocused;
-	private int hitStage;
+	private double firstScan; //upon exiting spinbot mode, correct angle with this
+	private double lastScanBearing; //Record last scanned robot position for main
+	private int targetFocus; //Incremented every radar sweep, reset ever successful scan. Tolerance of 3 misses before spinbot mode.
+	private boolean radarTurn; //Define direction to swipe radar in main, alternating
+	private boolean justFocused; //Tells main to use firstScan if targetFocus was just reset from spinbot mode
+	private int hitStage; //boss phase
+	private double projectedAngle; //carries number through circular targeting
 	
 	
 	public void run() {
@@ -25,7 +26,7 @@ public class Lephantis extends AdvancedRobot
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
-		// Robot main loop
+		// Main nerve
 
 		while(true) {
 			if (targetFocus > 3) {
@@ -48,8 +49,9 @@ public class Lephantis extends AdvancedRobot
 				}
 				setScanColor(new Color(220, 70, 150));
 			}
-			turnGunLeft(subtractBearing(getGunBearing(), lastScanBearing));
-			
+			if (targetFocus < 3) {
+				turnGunLeft(subtractBearing(getGunBearing(), lastScanBearing));
+			}
 			
 			if (targetFocus < 3) {
 				setFire(3.0);
@@ -66,10 +68,10 @@ public class Lephantis extends AdvancedRobot
 	}
 
 	/**
-	 * onScannedRobot: What to do when you see another robot
+	 * onScannedRobot: Nerve pattern on sensed prey
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
-		// Replace the next line with any behavior you would like
+		
 		if (targetFocus > 3) {
 			firstScan = getRadarTurnRemaining();
 			justFocused = true;
@@ -81,10 +83,10 @@ public class Lephantis extends AdvancedRobot
 	}
 
 	/**
-	 * onHitByBullet: What to do when you're hit by a bullet
+	 * onHitByBullet: Response nerve in case of defilement
 	 */
 	public void onHitByBullet(HitByBulletEvent e) {
-		// Replace the next line with any behavior you would like
+		
 		back(10);
 		if (getEnergy() < 50 && hitStage == 0) {
 			System.out.println("WE ARE YOUR FLESH. WHY DO YOU DEFILE US?");
@@ -93,13 +95,14 @@ public class Lephantis extends AdvancedRobot
 	}
 	
 	/**
-	 * onHitWall: What to do when you hit a wall
+	 * onHitWall: Nerve response to restraint
 	 */
 	public void onHitWall(HitWallEvent e) {
-		// Replace the next line with any behavior you would like
+		
 		back(20);
 	}	
 	
+	//Evolved neural routines
 	private double getGunBearing() {
 		double gunBearing = (getGunHeading() - getHeading());
 		if (gunBearing > 180) gunBearing -= 360;
