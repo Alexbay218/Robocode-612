@@ -38,11 +38,11 @@ public class Lephantis extends AdvancedRobot
 			}
 			if (targetFocus <= 3) {
 				if (radarTurn) {
-					if (subtractBearing(getRadarBearing(), lastScanBearing) > 20) turnRadarLeft(45);
+					if (getRadarBearing() - lastScanBearing > 20) turnRadarLeft(45);
 					else turnRadarLeft(2 * (subtractBearing(getRadarBearing(), lastScanBearing) + 5));
 					radarTurn = false;
 				} else {
-					if (subtractBearing(lastScanBearing, getRadarBearing()) > 20) turnRadarRight(45);
+					if (lastScanBearing - getRadarBearing() > 20) turnRadarRight(45);
 					else turnRadarRight(2 * (subtractBearing(lastScanBearing, getRadarBearing()) + 5));
 					radarTurn = true;
 				}
@@ -53,12 +53,12 @@ public class Lephantis extends AdvancedRobot
 			
 			if (targetFocus < 3) {
 				setFire(3.0);
-				if (Math.random() < 0.05) {
+				/*if (Math.random() < 0.05) {
 					setTurnLeft(20);
 					setAhead(100);
 				} else if (Math.random() < 0.05) {
 					setTurnRight(90);
-				}
+				}*/
 			}	
 			
 			if (getDistanceRemaining() == 0) targetFocus++;
@@ -115,8 +115,8 @@ public class Lephantis extends AdvancedRobot
 	}
 	
 	private double subtractBearing(double angle1, double angle2) {
-		if (angle1 > 0 && angle2 < 0) angle2 += 360;
-		if (angle1 < 0 && angle2 > 0) angle2 -= 360;
+		if (angle1 > 90 && angle2 < -90) angle2 += 360;
+		if (angle1 < -90 && angle2 > 90) angle2 -= 360;
 		angle1 -= angle2;
 		return angle1;
 	}
