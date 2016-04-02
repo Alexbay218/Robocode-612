@@ -53,12 +53,12 @@ public class Lephantis extends AdvancedRobot
 			
 			if (targetFocus < 3) {
 				setFire(3.0);
-				/*if (Math.random() < 0.05) {
+				if (Math.random() < 0.05) {
 					setTurnLeft(20);
 					setAhead(100);
 				} else if (Math.random() < 0.05) {
 					setTurnRight(90);
-				}*/
+				}
 			}	
 			
 			if (getDistanceRemaining() == 0) targetFocus++;
