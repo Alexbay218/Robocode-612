@@ -51,7 +51,7 @@ public class Lephantis extends AdvancedRobot
 				setScanColor(new Color(220, 70, 150));
 			}
 			if (targetFocus < 3) {
-				turnGunLeft(subtractBearing(getGunBearing(), projectedAngle));
+				setTurnGunLeft(subtractBearing(getGunBearing(), projectedAngle));
 			}
 			
 			if (targetFocus < 3) {
@@ -64,7 +64,7 @@ public class Lephantis extends AdvancedRobot
 				}
 			}	
 			
-			if (getDistanceRemaining() == 0) targetFocus++;
+			targetFocus++;
 		}
 	}
 
@@ -79,8 +79,9 @@ public class Lephantis extends AdvancedRobot
 		} else {
 			justFocused = false;
 		}
-		if (targetFocus <= 3) projectedAngle = e.getBearing() + (e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (targetFocus * subtractBearing(e.getBearing(), lastScanBearing));
-		else projectedAngle = e.getBearing(); //                        Number of ticks to reach target    x    Average dAngle / tick since last scan
+		if (targetFocus == 0) projectedAngle = e.getBearing() + ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
+		else if (targetFocus <= 3) projectedAngle = e.getBearing() + ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(), lastScanBearing) / targetFocus);
+		else projectedAngle = e.getBearing(); //                                  Number of ticks to reach target                   x               Average dAngle / tick since last scan
 		lastScanBearing = e.getBearing();
 		targetFocus = 0;
 	}
@@ -90,7 +91,7 @@ public class Lephantis extends AdvancedRobot
 	 */
 	public void onHitByBullet(HitByBulletEvent e) {
 		
-		back(10);
+		setBack(20);
 		if (getEnergy() < 50 && hitStage == 0) {
 			System.out.println("WE ARE YOUR FLESH. WHY DO YOU DEFILE US?");
 			hitStage++;
