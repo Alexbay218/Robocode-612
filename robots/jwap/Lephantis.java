@@ -14,10 +14,11 @@ public class Lephantis extends AdvancedRobot
 	private boolean justFocused; //Tells main to use firstScan if targetFocus was just reset from spinbot mode
 	private int hitStage; //boss phase
 	private double projectedAngle; //carries number through circular targeting
-	
+	private final double FIREPOWER = 3.0;
 	
 	public void run() {
 		
+		//Genetic blueprint
 		firstScan = 0;
 		targetFocus = 5;
 		hitStage = 0;
@@ -50,11 +51,11 @@ public class Lephantis extends AdvancedRobot
 				setScanColor(new Color(220, 70, 150));
 			}
 			if (targetFocus < 3) {
-				turnGunLeft(subtractBearing(getGunBearing(), lastScanBearing));
+				turnGunLeft(subtractBearing(getGunBearing(), projectedAngle));
 			}
 			
 			if (targetFocus < 3) {
-				setFire(3.0);
+				setFire(FIREPOWER);
 				if (Math.random() < 0.05) {
 					setTurnLeft(20);
 					setAhead(100);
@@ -78,6 +79,8 @@ public class Lephantis extends AdvancedRobot
 		} else {
 			justFocused = false;
 		}
+		if (targetFocus <= 3) projectedAngle = e.getBearing() + (e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (targetFocus * subtractBearing(e.getBearing(), lastScanBearing));
+		else projectedAngle = e.getBearing(); //                        Number of ticks to reach target    x    Average dAngle / tick since last scan
 		lastScanBearing = e.getBearing();
 		targetFocus = 0;
 	}
@@ -99,7 +102,7 @@ public class Lephantis extends AdvancedRobot
 	 */
 	public void onHitWall(HitWallEvent e) {
 		
-		back(20);
+		setBack(200);
 	}	
 	
 	//Evolved neural routines
