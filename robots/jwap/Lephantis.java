@@ -14,6 +14,8 @@ public class Lephantis extends AdvancedRobot
 	private boolean justFocused; //Tells main to use firstScan if targetFocus was just reset from spinbot mode
 	private int hitStage; //boss phase
 	private double projectedAngle; //carries number through circular targeting
+	private int[] accuracy;
+	private boolean advTargeting;
 	private final double FIREPOWER = 3.0;
 	
 	public void run() {
@@ -27,6 +29,8 @@ public class Lephantis extends AdvancedRobot
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
+		accuracy = new int[2]; //slot 1 numhits; slot 2 numshots
+		advTargeting = true;
 		// Main nerve
 
 		while(true) {
@@ -50,19 +54,36 @@ public class Lephantis extends AdvancedRobot
 				}
 				setScanColor(new Color(220, 70, 150));
 			}
-			if (targetFocus < 3) {
-				setTurnGunLeft(subtractBearing(getGunBearing(), projectedAngle));
-			}
 			
-			if (targetFocus < 3) {
-				setFire(FIREPOWER);
-				if (Math.random() < 0.05) {
+			if (getTurnRemaining() == 0) {
+				if (targetFocus <= 3) 
+				{
+					if (advTargeting) {
+						setTurnGunLeft(subtractBearing(getGunBearing(), projectedAngle));
+					} else {
+						setTurnGunLeft(subtractBearing(getGunBearing(), lastScanBearing));
+					setFire(FIREPOWER); 
+					}
+				}
+				if (subtractBearing(Math.abs(lastScanBearing), 90) > 20) {
+					if (lastScanBearing > 0) {
+						setTurnRight(90 - lastScanBearing);
+					} else {
+						setTurnLeft(90 - lastScanBearing);
+					}
+				}
+				if (Math.random() < 0.05) 
+				{
 					setTurnLeft(20);
 					setAhead(100);
-				} else if (Math.random() < 0.05) {
+				} 
+				else if (Math.random() < 0.05) 
+				{
 					setTurnRight(90);
 				}
 			}	
+			
+			if (accuracy[2] > 15 && (double) accuracy[1] / accuracy[2] < 0.1) advTargeting = !advTargeting;
 			
 			targetFocus++;
 		}
@@ -79,9 +100,16 @@ public class Lephantis extends AdvancedRobot
 		} else {
 			justFocused = false;
 		}
-		if (targetFocus == 0) projectedAngle = e.getBearing() + ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
-		else if (targetFocus <= 3) projectedAngle = e.getBearing() + ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(), lastScanBearing) / targetFocus);
-		else projectedAngle = e.getBearing(); //                                  Number of ticks to reach target                   x               Average dAngle / tick since last scan
+		if (getDistanceRemaining() == 0 && getTurnRemaining() == 0) {
+			if (targetFocus == 0) projectedAngle = e.getBearing() + ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
+			else if (targetFocus <= 3) projectedAngle = e.getBearing() + ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
+		}//                                                                        Number of ticks to reach target                   x               Average dAngle / tick since last scan
+		else projectedAngle = e.getBearing(); 
+		
+		if (targetFocus <= 3) {
+			setTurnGunLeft(subtractBearing(getGunBearing(), projectedAngle));
+			setFire(FIREPOWER);
+		}
 		lastScanBearing = e.getBearing();
 		targetFocus = 0;
 	}
