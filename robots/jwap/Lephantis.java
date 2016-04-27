@@ -24,7 +24,7 @@ public class Lephantis extends AdvancedRobot
 		firstScan = 0;
 		targetFocus = 5;
 		hitStage = 0;
-		setColors(new Color(148, 122, 114), new Color(207, 0, 120), new Color(255, 100, 150), new Color(255, 255, 255), new Color(180, 0, 100));
+		setColors(new Color(148, 122, 114), new Color(250, 100, 160), new Color(255, 100, 150), new Color(255, 255, 255), new Color(180, 0, 100));
 		System.out.println("WE WERE ENDLESS. CONSUME US. BE REBORN.");
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
@@ -64,26 +64,27 @@ public class Lephantis extends AdvancedRobot
 						setTurnGunLeft(subtractBearing(getGunBearing(), lastScanBearing));
 					setFire(FIREPOWER); 
 					}
-				}
-				if (subtractBearing(Math.abs(lastScanBearing), 90) > 20) {
-					if (lastScanBearing > 0) {
-						setTurnRight(90 - lastScanBearing);
-					} else {
-						setTurnLeft(90 - lastScanBearing);
+					if (subtractBearing(Math.abs(lastScanBearing), 90) > 20) {
+						if (lastScanBearing > 0) {
+							setTurnRight(10);
+						} else {
+							setTurnLeft(10);
+						}
 					}
 				}
-				if (Math.random() < 0.05) 
-				{
-					setTurnLeft(20);
-					setAhead(100);
-				} 
-				else if (Math.random() < 0.05) 
-				{
-					setTurnRight(90);
-				}
-			}	
+			}
 			
-			if (accuracy[1] > 15 && (double) accuracy[0] / accuracy[1] < 0.10) advTargeting = !advTargeting;
+			if (getDistanceRemaining() == 0) {
+				double moveNum = Math.random();
+				if (moveNum > 0.65) setAhead(Math.random() * 60);
+				else if (moveNum < 0.35) setBack(Math.random() * 60);
+			}
+			
+			if (accuracy[1] > 9 && (double) accuracy[0] / accuracy[1] < 0.10) {
+				advTargeting = !advTargeting;
+				if (advTargeting) setGunColor(new Color(250, 100, 160));
+				else  setGunColor(new Color(207, 0, 120));
+			}
 			
 			targetFocus++;
 		}
@@ -103,19 +104,22 @@ public class Lephantis extends AdvancedRobot
 		
 		projectedAngle = e.getBearing(); 
 		if (getDistanceRemaining() == 0 && getTurnRemaining() == 0) {
-			if (e.getDistance() < 300) {
+			double projection;
+				if (targetFocus == 0) projection = ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
+				else if (targetFocus <= 3) projection = ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
+		/*	if (e.getDistance() < 400) {
 				if (targetFocus == 0) projectedAngle = e.getBearing() + 
 						((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
 				else if (targetFocus <= 3) projectedAngle = e.getBearing() + 
 						((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
 				//				  Number of ticks to reach target                   x               Average dAngle / tick since last scan
 			}
-			else if (e.getDistance() < 600){
+			else if (e.getDistance() < 1000){
 				if (targetFocus == 0) projectedAngle = e.getBearing() + 
-					(1 - (600 - e.getDistance()) / 300) * ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
+						((1000 - e.getDistance()) / 600) * ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
 				else if (targetFocus <= 3) projectedAngle = e.getBearing() + 
-					(1 - (600 - e.getDistance()) / 300) * ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
-			}
+						((1000 - e.getDistance()) / 600) * ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
+			}*/
 		}
 		
 		
@@ -132,7 +136,6 @@ public class Lephantis extends AdvancedRobot
 	 */
 	public void onHitByBullet(HitByBulletEvent e) {
 		
-		setBack(20);
 		if (getEnergy() < 50 && hitStage == 0) {
 			System.out.println("WE ARE YOUR FLESH. WHY DO YOU DEFILE US?");
 			hitStage++;
@@ -143,8 +146,8 @@ public class Lephantis extends AdvancedRobot
 	 * onHitWall: Response to restraint
 	 */
 	public void onHitWall(HitWallEvent e) {
-		
-		setBack(200);
+		if (Math.abs(e.getBearing()) < 90) setBack(200);
+		else setAhead(200);
 	}	
 	
 	public void onBulletHit(BulletHitEvent event)
