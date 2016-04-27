@@ -29,7 +29,7 @@ public class Lephantis extends AdvancedRobot
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
-		accuracy = new int[2]; //slot 1 numhits; slot 2 numshots
+		accuracy = new int[2]; //slot 1 numhits; slot 2 nummissed
 		advTargeting = true;
 		// Main nerve
 
@@ -83,7 +83,7 @@ public class Lephantis extends AdvancedRobot
 				}
 			}	
 			
-			if (accuracy[2] > 15 && (double) accuracy[1] / accuracy[2] < 0.1) advTargeting = !advTargeting;
+			if (accuracy[1] > 15 && (double) accuracy[0] / accuracy[1] < 0.10) advTargeting = !advTargeting;
 			
 			targetFocus++;
 		}
@@ -100,11 +100,24 @@ public class Lephantis extends AdvancedRobot
 		} else {
 			justFocused = false;
 		}
+		
+		projectedAngle = e.getBearing(); 
 		if (getDistanceRemaining() == 0 && getTurnRemaining() == 0) {
-			if (targetFocus == 0) projectedAngle = e.getBearing() + ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
-			else if (targetFocus <= 3) projectedAngle = e.getBearing() + ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
-		}//                                                                        Number of ticks to reach target                   x               Average dAngle / tick since last scan
-		else projectedAngle = e.getBearing(); 
+			if (e.getDistance() < 300) {
+				if (targetFocus == 0) projectedAngle = e.getBearing() + 
+						((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
+				else if (targetFocus <= 3) projectedAngle = e.getBearing() + 
+						((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
+				//				  Number of ticks to reach target                   x               Average dAngle / tick since last scan
+			}
+			else if (e.getDistance() < 600){
+				if (targetFocus == 0) projectedAngle = e.getBearing() + 
+					(1 - (600 - e.getDistance()) / 300) * ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * subtractBearing(e.getBearing(), lastScanBearing);
+				else if (targetFocus <= 3) projectedAngle = e.getBearing() + 
+					(1 - (600 - e.getDistance()) / 300) * ((double)e.getDistance() / Rules.getBulletSpeed(FIREPOWER)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
+			}
+		}
+		
 		
 		if (targetFocus <= 3) {
 			setTurnGunLeft(subtractBearing(getGunBearing(), projectedAngle));
@@ -127,14 +140,24 @@ public class Lephantis extends AdvancedRobot
 	}
 	
 	/**
-	 * onHitWall: Nerve response to restraint
+	 * onHitWall: Response to restraint
 	 */
 	public void onHitWall(HitWallEvent e) {
 		
 		setBack(200);
 	}	
 	
-	//Evolved neural routines
+	public void onBulletHit(BulletHitEvent event)
+	{
+		accuracy[0]++;
+	}
+	
+	public void onBulletMissed(BulletMissedEvent event)
+	{
+		accuracy[1]++;
+	}
+	
+	//Evolved routines
 	private double getGunBearing() {
 		double gunBearing = (getGunHeading() - getHeading());
 		if (gunBearing > 180) gunBearing -= 360;
