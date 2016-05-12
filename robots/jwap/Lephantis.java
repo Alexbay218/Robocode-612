@@ -76,8 +76,10 @@ public class Lephantis extends AdvancedRobot
 			if (accuracy > 5) {
 				if (accuracy < 10) firepower = 3 - (2.5 * (  (accuracy - 5) / 5));
 				else firepower = 0.5;
-			}
+			} else firepower = 3.0;
 			
+
+
 			targetFocus++;
 		}
 	}
@@ -93,25 +95,43 @@ public class Lephantis extends AdvancedRobot
 		} else {
 			justFocused = false;
 		}
+			
+/*			| LF bAng
+ *			|\
+ * 			| \
+ * 		   a|  \ c
+ * 			|   \
+ * 			|____\
+ * 			   b
+ * 		 enemy   prediction
+ */
+		double a = e.getDistance();
+		double bAng = 0;
+		double b = e.getVelocity() * (e.getDistance() / Rules.getBulletSpeed(firepower));
+		double cAng = (180 - addToHeading(getHeading(), e.getBearing()) ) + e.getHeading();
+		double c = Math.sqrt( a*a + b*b + 2*a*b*Math.cos(cAng));
+			
+		bAng = Math.toDegrees( Math.asin( (b * Math.sin( Math.toRadians(c) )) / c ) );
 		
-		projectedAngle = e.getBearing(); 
-		if (getDistanceRemaining() == 0 && getTurnRemaining() == 0) {
-			double projection;
-			if (targetFocus == 0) projection = ((double)e.getDistance() / Rules.getBulletSpeed(firepower)) * subtractBearing(e.getBearing(), lastScanBearing);
-			else if (targetFocus <= 3) projection = ((double)e.getDistance() / Rules.getBulletSpeed(firepower)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
-			else projection = 0;
+		if (Math.abs(b) < 20) setBodyColor( new Color (0, 255, 0));
+		else setBodyColor (new Color (0, 0, 0));
 			
-			//insert extraneous distance adjustment if needed
+		
 			
-			projectedAngle = e.getBearing() + projection;
+		//	else if (targetFocus <= 3) projection = ((double)e.getDistance() / Rules.getBulletSpeed(firepower)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
+		//	else projection = 0; // 											num turns to reach 				x				dAngle/Tick from previous scan
+			
+			
+			
+			projectedAngle = e.getBearing() + bAng;
 
-		}
 		
 		
 		if (targetFocus <= 3) {
 			setTurnGunLeft(subtractBearing(getGunBearing(), projectedAngle));
 			setFire(firepower);
 		}
+
 		
 		lastScanBearing = e.getBearing();
 		targetFocus = 0;
@@ -165,6 +185,12 @@ public class Lephantis extends AdvancedRobot
 		if (angle1 > 90 && angle2 < -90) angle2 += 360;
 		if (angle1 < -90 && angle2 > 90) angle2 -= 360;
 		angle1 -= angle2;
+		return angle1;
+	}
+	private double addToHeading(double angle1, double angle2) {
+		angle1 += angle2;
+		if (angle1 > 360) angle1 -= 360;
+		if (angle1 < 0) angle1 = 360 + angle1;
 		return angle1;
 	}
 }
