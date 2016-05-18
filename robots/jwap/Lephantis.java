@@ -13,7 +13,7 @@ public class Lephantis extends AdvancedRobot
 	private boolean radarTurn; //Define direction to swipe radar in main, alternating
 	private boolean justFocused; //Tells main to use firstScan if targetFocus was just reset from spinbot mode
 	private int hitStage; //boss phase
-	private double projectedAngle; //carries number through circular targeting
+//	private double projectedAngle; //carries number through circular targeting
 	private int accuracy;
 	private double firepower;
 	
@@ -105,7 +105,7 @@ public class Lephantis extends AdvancedRobot
  * 			   b
  * 		 enemy   prediction
  */
-		double a = e.getDistance();
+	/*	double a = e.getDistance();
 		double bAng = 0;
 		double b = e.getVelocity() * (e.getDistance() / Rules.getBulletSpeed(firepower));
 		double cAng = (180 - addToHeading(getHeading(), e.getBearing()) ) + e.getHeading();
@@ -113,17 +113,18 @@ public class Lephantis extends AdvancedRobot
 			
 		bAng = Math.toDegrees( Math.asin( (b * Math.sin( Math.toRadians(c) )) / c ) );
 		
-		if (Math.abs(b) < 20) setBodyColor( new Color (0, 255, 0));
-		else setBodyColor (new Color (0, 0, 0));
+	if (Math.abs(cAng) < 90) setBodyColor( new Color (0, 255, 0));
+	else setBodyColor (new Color (0, 0, 0));
 			
-		
+		*/
 			
 		//	else if (targetFocus <= 3) projection = ((double)e.getDistance() / Rules.getBulletSpeed(firepower)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
 		//	else projection = 0; // 											num turns to reach 				x				dAngle/Tick from previous scan
+			double eAbsoluteBearing = e.getBearing() + getHeading();
+			double eLateralVelocity = e.getVelocity() * Math.sin(Math.toRadians(e.getHeading() - eAbsoluteBearing));
+			double projection = Math.toDegrees(Math.asin(eLateralVelocity / Rules.getBulletSpeed(firepower))) * ((firepower + 3) / 6);
 			
-			
-			
-			projectedAngle = e.getBearing() + bAng;
+			double projectedAngle = e.getBearing() + projection;
 
 		
 		
@@ -187,10 +188,10 @@ public class Lephantis extends AdvancedRobot
 		angle1 -= angle2;
 		return angle1;
 	}
-	private double addToHeading(double angle1, double angle2) {
+/*	private double addToHeading(double angle1, double angle2) {
 		angle1 += angle2;
 		if (angle1 > 360) angle1 -= 360;
 		if (angle1 < 0) angle1 = 360 + angle1;
 		return angle1;
-	}
+	}*/
 }
