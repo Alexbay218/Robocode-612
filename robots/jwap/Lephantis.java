@@ -16,6 +16,8 @@ public class Lephantis extends AdvancedRobot
 //	private double projectedAngle; //carries number through circular targeting
 	private int accuracy;
 	private double firepower;
+	private boolean posLatV;
+	private double targetingModifier;
 	
 	public void run() {
 		
@@ -30,6 +32,8 @@ public class Lephantis extends AdvancedRobot
 		setAdjustRadarForRobotTurn(true);
 		firepower = 3.0;
 		accuracy = 0; //shots missed since last hit
+		targetingModifier = 1.0;
+		
 		// Main nerve
 
 		while(true) {
@@ -96,39 +100,35 @@ public class Lephantis extends AdvancedRobot
 			justFocused = false;
 		}
 			
-/*			| LF bAng
- *			|\
- * 			| \
- * 		   a|  \ c
- * 			|   \
- * 			|____\
- * 			   b
- * 		 enemy   prediction
- */
-	/*	double a = e.getDistance();
-		double bAng = 0;
-		double b = e.getVelocity() * (e.getDistance() / Rules.getBulletSpeed(firepower));
-		double cAng = (180 - addToHeading(getHeading(), e.getBearing()) ) + e.getHeading();
-		double c = Math.sqrt( a*a + b*b + 2*a*b*Math.cos(cAng));
-			
-		bAng = Math.toDegrees( Math.asin( (b * Math.sin( Math.toRadians(c) )) / c ) );
-		
-	if (Math.abs(cAng) < 90) setBodyColor( new Color (0, 255, 0));
-	else setBodyColor (new Color (0, 0, 0));
-			
-		*/
-			
-		//	else if (targetFocus <= 3) projection = ((double)e.getDistance() / Rules.getBulletSpeed(firepower)) * (subtractBearing(e.getBearing(),lastScanBearing) / targetFocus);
-		//	else projection = 0; // 											num turns to reach 				x				dAngle/Tick from previous scan
-			double eAbsoluteBearing = e.getBearing() + getHeading();
-			double eLateralVelocity = e.getVelocity() * Math.sin(Math.toRadians(e.getHeading() - eAbsoluteBearing));
-			double projection = Math.toDegrees(Math.asin(eLateralVelocity / Rules.getBulletSpeed(firepower))) * ((firepower + 3) / 6);
-			
-			double projectedAngle = e.getBearing() + projection;
 
+		double eAbsoluteBearing = e.getBearing() + getHeading();
+		double eLateralVelocity = e.getVelocity() * Math.sin(Math.toRadians(e.getHeading() - eAbsoluteBearing));
+		double projection = Math.toDegrees(Math.asin(eLateralVelocity / Rules.getBulletSpeed(firepower))) * ((firepower + 3) / 6) * targetingModifier;
 		
+		double projectedAngle = e.getBearing() + projection;
+		
+		if (targetFocus > 3) {
+			if (eLateralVelocity > 0) posLatV = true;
+			else if (eLateralVelocity < 0) posLatV = false;
+		}
+		
+	
 		
 		if (targetFocus <= 3) {
+			if (posLatV == true && eLateralVelocity < 0) {
+				posLatV = false;
+				if (targetingModifier > 0.5) {
+					targetingModifier -= 0.1;
+				}
+			}
+			else if (posLatV == false && eLateralVelocity > 0) {
+				posLatV = false;
+				if (targetingModifier > 0.5) {
+					targetingModifier -= 0.1;
+				}
+			} else if (targetingModifier <= 0.99) targetingModifier += 0.01;
+			
+
 			setTurnGunLeft(subtractBearing(getGunBearing(), projectedAngle));
 			setFire(firepower);
 		}
